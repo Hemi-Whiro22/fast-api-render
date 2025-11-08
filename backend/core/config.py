@@ -15,11 +15,11 @@ _env_state = load_env()
 class Settings(BaseSettings):
     """Application settings sourced from validated environment variables."""
 
-    supabase_url: str = Field(alias="DEN_URL")
-    supabase_service_role_key: str = Field(alias="DEN_API_KEY")
+    supabase_url: Optional[str] = Field(default=None, alias="DEN_URL")
+    supabase_service_role_key: Optional[str] = Field(default=None, alias="DEN_API_KEY")
     supabase_anon_key: Optional[str] = Field(default=None, alias="TEPUNA_API_KEY")
     supabase_publishable_key: Optional[str] = Field(default=None, alias="TEPUNA_URL")
-    openai_api_key: str = Field(alias="OPENAI_API_KEY")
+    openai_api_key: Optional[str] = Field(default=None, alias="OPENAI_API_KEY")
 
     class Config:
         env_file = ".env"
@@ -30,8 +30,8 @@ class Settings(BaseSettings):
     lc_all: str = "mi_NZ.UTF-8"
 
     offline_mode: bool = False
-    database_url: str | None = None
-    memory_table: str | None = None
+    database_url: Optional[str] = None
+    memory_table: Optional[str] = None
 
     # OpenAI models
     translation_model: str = "gpt-4o-mini"
