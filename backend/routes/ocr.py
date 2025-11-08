@@ -9,7 +9,7 @@ from PIL import Image, UnidentifiedImageError
 import pytesseract
 from pydantic import BaseModel
 
-from backend.config import get_settings
+from backend.core.config import get_settings
 from backend.utils.logger import get_logger
 from backend.utils.openai_client import generate_embedding
 from backend.utils.pgvector_client import store_embedding

@@ -9,8 +9,7 @@ from fastapi import FastAPI
 
 from backend.core.config import get_settings, get_settings_summary
 from backend.core.env_loader import load_env
-from backend.routes import embed, memory, translate
-# from backend.routes import ocr  # Disabled: requires tesseract and PIL
+from backend.routes import embed, memory, ocr, translate
 from backend.routes.tiwhanawhana import intake, mauri
 from backend.utils.env_validator import validate_environment_and_locale
 from backend.utils.logger import get_logger
@@ -31,7 +30,7 @@ validation_results = validate_environment_and_locale()
 app = FastAPI(title="Tiwhanawhana Core Service", version="1.0.0")
 apply_utf8_middleware(app)
 
-# app.include_router(ocr.router, prefix="/ocr", tags=["OCR"])  # Disabled: requires PIL & tesseract
+app.include_router(ocr.router, prefix="/ocr", tags=["OCR"])
 app.include_router(translate.router, prefix="/translate", tags=["Translate"])
 app.include_router(embed.router, prefix="/embed", tags=["Embed"])
 app.include_router(memory.router, prefix="/memory", tags=["Memory"])

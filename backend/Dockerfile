@@ -4,18 +4,19 @@ FROM python:3.13-slim
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    LC_ALL=en_NZ.UTF-8 \
-    LANG=en_NZ.UTF-8
+    LC_ALL=mi_NZ.UTF-8 \
+    LANG=mi_NZ.UTF-8
 
-# Install system packages needed by Pillow & PostgreSQL
+# Install system packages needed by Pillow, OCR & PostgreSQL
 RUN apt-get update && apt-get install -y \
     build-essential \
     libjpeg-dev \
     zlib1g-dev \
     libpng-dev \
     libfreetype6-dev \
+    tesseract-ocr \
     locales \
-    && locale-gen en_NZ.UTF-8 \
+    && locale-gen mi_NZ.UTF-8 \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
