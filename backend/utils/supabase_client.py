@@ -137,6 +137,33 @@ def insert_record(project: str, table: str, record: dict) -> dict:
         }
 
 
+def fetch_records(project: str = "den", table: str = "", select: str = "*", limit: int = 100) -> list:
+    """
+    Fetch records from a Supabase table.
+    
+    Args:
+        project: "den" or "tepuna"
+        table: Table name
+        select: Select clause (default: all columns)
+        limit: Max records to return
+    
+    Returns:
+        List of records or empty list on error
+    """
+    client = get_supabase_client(project)
+    if not client or not table:
+        logger.warning("Cannot fetch from %s.%s: client unavailable or table empty", project, table)
+        return []
+    
+    try:
+        result = client.table(table).select(select).limit(limit).execute()
+        return result.data or []
+    except Exception as e:
+        logger.error("Fetch failed on %s.%s: %s", project, table, e)
+        return []
+
+
 # Initialize clients on import (with fallback)
 supabase_den = get_supabase_client("den")
 supabase_tepuna = get_supabase_client("tepuna")
+
