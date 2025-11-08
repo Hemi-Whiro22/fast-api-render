@@ -163,6 +163,38 @@ def fetch_records(project: str = "den", table: str = "", select: str = "*", limi
         return []
 
 
+def fetch_latest(table_path: str) -> dict:
+    """
+    Fetch the latest record from a table.
+    Supports both "table_name" and "project.table_name" formats.
+    
+    Args:
+        table_path: Table name or "project.table_name"
+    
+    Returns:
+        Latest record dict or empty dict on error
+    """
+    # Parse project and table from path
+    if "." in table_path:
+        project, table = table_path.split(".", 1)
+    else:
+        project = "den"
+        table = table_path
+    
+    client = get_supabase_client(project)
+    if not client or not table:
+        logger.warning("Cannot fetch latest from %s: client unavailable", table_path)
+        return {}
+    
+    try:
+        result = client.table(table).select("*").order("created_at", desc=True).limit(1).execute()
+        records = result.data or []
+        return records[0] if records else {}
+    except Exception as e:
+        logger.error("Fetch latest failed on %s: %s", table_path, e)
+        return {}
+
+
 # Initialize clients on import (with fallback)
 supabase_den = get_supabase_client("den")
 supabase_tepuna = get_supabase_client("tepuna")

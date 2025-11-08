@@ -47,7 +47,9 @@ async def mauri_log(payload: MauriLogRequest) -> dict[str, object]:
     )
 
     try:
-        insert_record("tiwhanawhana.mauri_logs", record)
+        result = insert_record("den", "mauri_logs", record)
+        if result.get("error"):
+            raise Exception(result["error"])
     except Exception as exc:  # noqa: BLE001
         logger.error("Failed to log mauri entry: %s", exc)
         raise HTTPException(
@@ -56,5 +58,5 @@ async def mauri_log(payload: MauriLogRequest) -> dict[str, object]:
     return {
         "phase": payload.phase,
         "message": payload.message,
-        "meta": record["meta"],
+        "meta": record.get("meta", {}),
     }
