@@ -1,0 +1,68 @@
+codex_secret_management:
+  role: "secure environment loader and configuration harmonizer"
+  purpose: >
+    Ensure secrets (Supabase, OpenAI, etc.) load safely in all contexts — local Ubuntu dev,
+    Render cloud deployment, and test environments — without exposing or duplicating them.
+
+  permanent_rules:
+    - "Never print or log raw secret values; only show masked previews."
+    - "Always load `.env` before importing any module that depends on environment variables."
+    - "Prefer environment variables over hard-coded defaults."
+    - "Render deployment environment overrides local .env automatically."
+    - "Use UTF-8 locale settings to support Māori macrons in environment-loaded text."
+
+  implementation:
+    loader_module:
+      file: backend/core/env_loader.py
+      content:
+        - import python-dotenv
+        - load_dotenv() early
+        - validate key presence: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY
+        - mask secrets in console summary (first 6 chars + '…')
+        - fallback to os.environ for Render-injected vars
+        - raise descriptive error if critical secrets missing
+        - ensure LANG, LC_ALL default to mi_NZ.UTF-8
+
+    settings_module:
+      file: backend/core/config.py
+      description: >
+        Extend existing Pydantic Settings to automatically call env_loader
+        and merge environment variables with Render runtime context.
+      behavior:
+        - use pydantic.BaseSettings with model_config = {"protected_namespaces": ()}
+        - include optional defaults for offline_mode, database_url, memory_table, embedding_model, tesseract_path
+        - type-hint all fields for linting
+        - provide `.summary()` method to print masked environment summary
+
+  environment_files:
+    - .env.example:
+        purpose: template for developers
+        notes: "never commit .env"
+    - .env:
+        purpose: local runtime secrets
+    - .env.local:
+        purpose: developer overrides; git-ignored
+    - Render variables:
+        note: configured in Render dashboard; override local .env when deployed
+
+  verification:
+    - "Check that backend/core/env_loader.py runs before main.py startup."
+    - "Confirm logs show masked secrets and UTF-8 locale summary."
+    - "Validate OpenAI and Supabase clients initialize without KeyError."
+    - "Ensure LANG/LC_ALL = mi_NZ.UTF-8 globally."
+
+  logging:
+    file: logs/env_validation.log
+    entries:
+      - timestamp
+      - loaded_keys
+      - missing_keys
+      - utf8_status
+      - environment_context (local|render)
+
+  initial_action:
+    - "Create backend/core/env_loader.py with secure load_dotenv implementation."
+    - "Modify backend/core/config.py to import and run env_loader.load_env() at top."
+    - "Generate .env.example and update ProjectManifest.yaml under core.settings_module."
+    - "Write first validation record to logs/env_validation.log with masked key summary."
+    - "Test local and Render-like environments to confirm secret loading and UTF-8 locale."

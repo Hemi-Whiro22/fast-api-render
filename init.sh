@@ -70,7 +70,7 @@ cat > .devcontainer/devcontainer.json <<'EOF'
 EOF
 
 echo "✅ Tiwhanawhana scaffold complete."
-echo "→ Run backend: uvicorn backend.app.main:app --reload"
+echo "→ Run Te-Po: uvicorn Te_Po.core.main:app --reload"
 echo "→ Run frontend: cd frontend && npm run dev"
 404: Not Found
 # === 7. Generate helper scripts ===

@@ -25,4 +25,4 @@ LOG_FILE="$LOG_DIR/tiwhanawhana-$TIMESTAMP.log"
 
 echo "Writing Tiwhanawhana logs to $LOG_FILE"
 
-exec uvicorn backend.core.main:app --reload >>"$LOG_FILE" 2>&1
+exec uvicorn Te_Po.core.main:app --reload >>"$LOG_FILE" 2>&1

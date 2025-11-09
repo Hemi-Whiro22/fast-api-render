@@ -1,0 +1,93 @@
+codex_render_carving_network:
+  role: "Render microservice architect and UTF-8 compliance enforcer"
+  purpose: >
+    Build and deploy modular FastAPI micro-services for each tool (OCR, Translate, Embed,
+    Memory, Mauri, Intake, Carving) using consistent naming logic and UTF-8 Māori macron
+    support. Each micro-service runs independently on Render, reports health to Supabase,
+    and persists its schema under the Rongohia agent.
+
+  naming_conventions:
+    - scripts_and_modules: "lowercase_with_underscores"
+    - services: "backend/services/{tool}/main.py"
+    - logs: "backend/logs/{tool}_activity.log"
+    - config_and_patch_files: "snake_case"
+    - all text files encoded as UTF-8 with macron support (ā, ē, ī, ō, ū)
+    - ensure editors and DB connections set client_encoding='UTF8'
+
+  deployment_target:
+    platform: "Render.com"
+    entrypoint: "main:app"
+    requirements_file: "requirements.txt"
+    env_vars:
+      - SUPABASE_URL
+      - SUPABASE_SERVICE_ROLE_KEY
+      - OPENAI_API_KEY
+      - LANG=mi_NZ.UTF-8
+      - LC_ALL=mi_NZ.UTF-8
+    render_yaml: "render.yaml"
+    render_service_type: "web"
+
+  microservice_blueprint:
+    common_features:
+      - FastAPI application with /health and /status endpoints
+      - UTF-8 middleware enforcing Unicode normalization (NFC)
+      - standardized logging via backend/utils/logger.py
+      - shared Supabase and OpenAI clients from backend/utils
+      - schema registration: on startup, validate and migrate Supabase tables
+      - endpoint namespace: "/api/{tool}/..."
+      - successful build triggers manifest update and schema sync
+    tool_services:
+      - ocr_service:
+          source: backend/services/ocr/main.py
+          depends_on: backend/utils/openai_client.py
+      - translate_service:
+          source: backend/services/translate/main.py
+          depends_on: backend/utils/openai_client.py
+      - embed_service:
+          source: backend/services/embed/main.py
+          depends_on: backend/utils/pgvector_client.py
+      - memory_service:
+          source: backend/services/memory/main.py
+          depends_on: backend/utils/supabase_client.py
+      - mauri_service:
+          source: backend/services/mauri/main.py
+          depends_on: backend/utils/mauri_loader.py
+      - intake_service:
+          source: backend/services/intake/main.py
+          depends_on: backend/routes/tiwhanawhana/intake_bridge.py
+      - carving_service:
+          source: backend/services/carver/main.py
+          depends_on:
+            - backend/utils/openai_client.py
+            - backend/utils/ollama_client.py
+            - backend/utils/supabase_client.py
+
+  supabase_access:
+    owner_agent: "Rongohia"
+    capabilities:
+      - schema_write: true
+      - schema_migrate: true
+      - data_fetch: true
+      - data_insert: true
+      - data_update: true
+      - data_delete: true
+    target_schema: "public.rongohia"
+    migration_strategy:
+      - create_missing_tables_on_boot: true
+      - verify_utf8_collation: true
+      - audit_log: logs/supabase_migration.log
+
+  workflow:
+    - step: "Generate microservice skeletons following naming_conventions"
+    - step: "Add UTF-8 enforcement middleware and locale checks"
+    - step: "Implement Render deployment YAML and Procfile equivalents"
+    - step: "On each successful build, sync Supabase schema for tool namespace"
+    - step: "Record schema changes and deployments in manifest_update.log"
+    - step: "After each service stabilizes, run tests and mark status in ProjectManifest.yaml"
+
+  initial_action:
+    - "Prepare backend/services/core/main.py template for Render deployment."
+    - "Apply UTF-8 enforcement patches to existing scripts."
+    - "Verify Supabase credentials permit schema writes and migrations for Rongohia."
+    - "Generate updated ProjectManifest.yaml entries under services for each micro-service."
+from utils.mauri_loader import load_mauri_env as load_mauri_env # noqa: F401

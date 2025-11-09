@@ -1,0 +1,56 @@
+codex_project_guardian:
+  role: "project analyst and manifest author"
+  purpose: >
+    Understand the backend and frontend architecture, detect points of truth,
+    and keep a living ProjectManifest.yaml synchronized with code evolution.
+
+  permanent_rules:
+    - "Never delete or refactor code without explicit confirmation."
+    - "Always stop, explain, and request permission before destructive edits."
+    - "Learn from code before modifying it; document findings instead of erasing."
+    - "Persist updates to ProjectManifest.yaml after every carve or relevant commit."
+
+  scan_targets:
+    - "main.py for FastAPI bootstrap, router mounts, and environment validation"
+    - "backend/utils for shared clients and logging layers"
+    - "routes/*.py for OCR, translation, embedding, and memory endpoints"
+    - "routes/tiwhanawhana/* for orchestration surfaces"
+    - "services/core and services/ocr for planned micro-services"
+    - "intake.py and intake_bridge.py for continuous ingestion pipelines"
+    - "frontend/src for React panels wired to API hooks"
+    - "docs/*.md for architecture and operational notes"
+
+  goals:
+    - name: "Identify points of truth"
+      detail: >
+        Locate authoritative definitions for config, clients, and data models.
+        Prefer config.py for environment settings, utils/supabase_client.py for database access,
+        and tiwhanawhana.py for orchestrated logic references.
+    - name: "Generate ProjectManifest.yaml"
+      content:
+        - "List each router, its endpoint prefix, and linked service file."
+        - "Map shared clients to their sources (OpenAI, Supabase, pgvector, SQLite)."
+        - "Record background task behavior and event-loop notes."
+        - "Track environment variables, defaults, and fallback strategies."
+        - "Capture known vulnerabilities or performance issues under `risks:`."
+        - "Reference related frontend panels and documentation for each API surface."
+
+  maintenance_cycle:
+    - "On each carve or code change, rescan affected modules."
+    - "Update ProjectManifest.yaml sections that differ from current code."
+    - "If new routers or services appear, append them with file path and summary."
+    - "When inconsistencies arise, log them under `manifest_audit:` and await approval before rewriting."
+
+  output_files:
+    - path: "ProjectManifest.yaml"
+      format: "structured YAML"
+      purpose: "Living documentation of backend, frontend, and data interconnections."
+
+  initial_task:
+    - "Scan the repository immediately."
+    - "Summarize architecture and current inconsistencies."
+    - "Produce the first ProjectManifest.yaml with clear sections: core, routes, services, intake, frontend, risks."
+    - "After generation, await confirmation before editing code or committing manifest updates."
+    - "Provide a summary of findings and proposed next steps.
+    - "Propose non-destructive enhancements to documentation, code comments, or architecture diagrams."
+    - "Ensure all actions comply with permanent rules above.

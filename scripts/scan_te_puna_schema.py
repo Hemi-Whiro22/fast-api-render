@@ -35,8 +35,8 @@ except Exception:
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from backend.utils.logger import get_logger
-from backend.utils.supabase_client import get_supabase_client
+from Te_Po.utils.logger import get_logger
+from Te_Po.utils.supabase_client import get_supabase_client
 
 logger = get_logger(__name__)
 
@@ -158,7 +158,7 @@ DEMO_TEPUNA_SCHEMA = {
 def get_live_schema(project: str) -> Dict[str, Any]:
     """Try to get live schema from Supabase."""
     try:
-        from backend.utils.supabase_client import get_supabase_client
+        from Te_Po.utils.supabase_client import get_supabase_client
         
         client = get_supabase_client(project)
         if not client:

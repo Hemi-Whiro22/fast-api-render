@@ -1,9 +1,10 @@
 core:
+  orchestrator_realm: Te-Po (backend) + Te-Ao (frontend) + mauri (realm configs)
   fastapi_entrypoint:
-    file: backend/main.py
+    file: Te-Po/core/main.py
     description: FastAPI application bootstrap mounting OCR, Translate, Embed, Memory, Mauri, and Intake routers.
     validation_pipeline:
-      module: backend/utils/env_validator.py
+      module: Te-Po/utils/env_validator.py
       actions:
         - Load optional .env with python-dotenv when available.
         - Validate required environment variables and mask secrets in logs.
@@ -13,10 +14,10 @@ core:
         - logs/system_health.json
         - console summary during startup
   settings_module:
-    file: backend/core/config.py
-    description: Pydantic BaseSettings wired to the secure env loader; backend/config.py re-exports for legacy imports.
+    file: Te-Po/core/config.py
+    description: Pydantic BaseSettings wired to the secure env loader; Te-Po/config.py re-exports for legacy imports.
     loader:
-      file: backend/core/env_loader.py
+      file: Te-Po/core/env_loader.py
       guarantees:
         - load_dotenv executes before settings instantiation and respects Render overrides.
         - Secrets masked (first six characters only) in console summaries.
@@ -26,8 +27,8 @@ core:
       SUPABASE_URL:
         required: true
         consumers:
-          - backend/utils/supabase_client.py
-          - backend/routes/tiwhanawhana/intake_bridge.py
+          - Te-Po/utils/supabase_client.py
+          - Te-Po/routes/tiwhanawhana/intake_bridge.py
           - backend/utils/env_validator.py
           - logs/env_validation.log (audit trail via env_loader)
       SUPABASE_SERVICE_ROLE_KEY:

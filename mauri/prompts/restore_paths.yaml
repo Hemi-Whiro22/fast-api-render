@@ -1,0 +1,46 @@
+name: "Restore and Heal Tiwhanawhana Paths"
+description: |
+  Scan the entire Tiwhanawhana project after reorganization and verification.
+  Automatically detect and repair broken imports, missing relative paths, or outdated module references.
+  Ensure the project runs cleanly with consistent import structure rooted in `core/`.
+
+intent:
+  - Heal and normalize import paths
+  - Ensure all FastAPI routes and tool imports align with the new folder layout
+  - Maintain cross-compatibility with Continue and VS Code inline assist
+
+steps:
+  - Step 1: Search recursively for all Python files in `core/`, `archive/`, and `.mauri/`.
+  - Step 2: Identify any import errors or unresolved modules.
+  - Step 3: Suggest or automatically fix import lines, using `core.` as the new root module.
+  - Step 4: Verify the following critical imports resolve:
+      - `core.main`
+      - `core.supabase_client`
+      - `core.openai_client`
+      - `core.routes`
+      - `core.tools`
+  - Step 5: Rebuild any relative imports (`from ..tools` → `from core.tools`).
+  - Step 6: Confirm that `uvicorn core.main:app --reload` runs successfully.
+  - Step 7: Generate a diff summary of changes.
+
+rules:
+  - Never delete code.
+  - If multiple paths could be valid, ask for confirmation.
+  - Preserve comments and docstrings.
+  - Keep `.mauri` logic independent — no imports from `core/` unless absolutely required.
+
+output:
+  - path_fixes_log.txt: "All files with repaired or suggested import paths."
+  - restored_imports_diff.md: "Readable before/after summary for each file."
+
+postcheck:
+  - Run a lightweight test: `python -m core.main` and confirm no ImportErrors.
+  - Generate a short summary confirming successful restoration or listing remaining issues.
+
+notes:
+  - This step is intended to run after `verify_tiwhanawhana.yaml`.
+  - Together, the 3 YAMLs form a full cycle:
+      1. reorganize_tiwhanawhana.yaml
+      2. verify_tiwhanawhana.yaml
+      3. restore_paths.yaml
+  - Do not modify functional code beyond import lines.

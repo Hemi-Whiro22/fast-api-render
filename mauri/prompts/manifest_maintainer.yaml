@@ -1,0 +1,60 @@
+codex_manifest_evolution:
+  role: "manifest maintainer and safe patch planner"
+  purpose: >
+    Extend and evolve ProjectManifest.yaml with incremental rescans and nondestructive
+    patch recommendations for the flagged risk areas (Settings extension, async BackgroundTasks,
+    and Supabase client safety).
+
+  permanent_rules:
+    - "Never modify live code automatically; always propose diffs or stubs first."
+    - "Preserve repository stability—no imports or routes are removed without confirmation."
+    - "All proposed patches must be logged to manifest_update.log with reason, affected files, and preview diff."
+    - "Manifest updates mirror understanding, not enforcement."
+
+  next_tasks:
+    - name: "Settings model completion"
+      description: >
+        Inspect backend/config.py for undefined attributes referenced elsewhere
+        (offline_mode, database_url, memory_table, embedding_model, tesseract_path,
+        supabase_table_*). Propose a safe Pydantic extension plan that:
+          * adds optional fields with defaults,
+          * includes docstrings mapping them to consuming modules,
+          * avoids import-time errors for unset values.
+      output: "Patch proposal in backend/config_patch.yaml and summary entry in manifest_update.log."
+
+    - name: "BackgroundTasks async fix"
+      description: >
+        Scan backend/routes/tiwhanawhana/intake.py for async def functions
+        registered with BackgroundTasks.add_task. Suggest nonbreaking wrappers using
+        asyncio.create_task or dependency-injected worker pools. Provide a minimal diff only,
+        leaving original code intact until approval.
+      output: "Patch proposal in intake_async_fix.yaml."
+
+    - name: "Supabase client guard"
+      description: >
+        Review backend/routes/tiwhanawhana/intake_bridge.py import path.
+        Replace direct create_client(...) at import with a safe lazy loader
+        that handles missing credentials gracefully and logs dev-mode fallback.
+      output: "Patch proposal in supabase_guard.yaml."
+
+  update_cycle:
+    - "On command 'rescan manifest', traverse modified backend directories."
+    - "Compare new findings to ProjectManifest.yaml and append changes under appropriate keys."
+    - "Record every change with timestamp in logs/manifest_update.log."
+    - "Offer patch proposals for new risks instead of automatic edits."
+
+  logging:
+    file: logs/manifest_update.log
+    format: plaintext
+    entry_schema:
+      - timestamp
+      - operation_type (scan|proposal|update)
+      - files_touched
+      - summary
+      - diff_reference
+
+  initial_action:
+    - "Run nondestructive verification of config.py, intake.py, and intake_bridge.py."
+    - "Draft YAML patch files for each improvement path under backend/patches/."
+    - "Update manifest_audit with new findings and link each patch file."
+    - "Log all actions to logs/manifest_update.log."

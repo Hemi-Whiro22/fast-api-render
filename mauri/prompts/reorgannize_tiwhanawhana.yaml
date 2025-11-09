@@ -1,0 +1,33 @@
+name: "Reorganize Tiwhanawhana Safely"
+description: |
+  Simplify and reorganize the Tiwhanawhana repository into a clear, readable structure without deleting or breaking anything.
+  Focus on keeping imports and relative paths intact.
+
+goals:
+  - Move all active Python files into `core/` and automatically update imports.
+  - Move manifests, configs, and YAMLs into `.mauri/`.
+  - Move unused folders like `mkdir`, `touch`, `scripts`, `services`, and `documents` into `archive/`.
+  - Ensure `uvicorn core.main:app --reload` still runs after refactor.
+  - Keep one `venv/` environment and fix interpreter path in VS Code.
+  - Generate a `.gitignore` to keep noise out of Git.
+
+context:
+  current_structure: "tiwhanawhana"
+  target_structure:
+    - ".mauri/": "manifests, configs, secrets"
+    - "core/": "FastAPI, tools, routes, utils, main.py"
+    - "frontend/": "React or Vite UI"
+    - "logs/": "runtime logs"
+    - "archive/": "old or experimental code"
+    - "venv/": "active Python environment"
+  safety_rules:
+    - Do not delete any files.
+    - Always update import paths automatically.
+    - Report moved files and rewritten paths.
+
+tasks:
+  - Step 1: Identify code, config, and legacy folders.
+  - Step 2: Move them into their target folders.
+  - Step 3: Rewrite import paths relative to `core/`.
+  - Step 4: Verify the FastAPI app still starts.
+  - Step 5: Output a summary of moves and any unresolved imports.

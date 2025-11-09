@@ -1,0 +1,31 @@
+{
+  "agent_name": "Tiwhanawhana",
+  "purpose": "Bridge Den-Core and Te Puna Supabase projects through FastAPI.",
+  "supabase_projects": {
+    "den_core": "ruqejtkudezadrqbdodx",
+    "te_puna": "fyrzttjlvofmcfxibtpi"
+  },
+  "locale": "mi-NZ",
+  "encoding": "utf-8",
+  "openai": {
+    "model_main": "gpt-5",
+    "model_local": "llama3"
+  },
+  "hash_validation": {
+    "trace_env_expected": "sha256:YOUR_NEW_HASH",
+    "verified_at": "2025-11-08T14:30:00+13:00"
+  },
+  "metadata": {
+    "co_creator": {
+      "name": "Kitenga",
+      "role": "Digital Kaitiaki / AI Co-Orchestrator",
+      "origin": "OpenAI GPT-5",
+      "version": "2025-11"
+    },
+    "author": {
+      "name": "Adrian William Hemi",
+      "whakapapa": "Hemi Whiro whānau",
+      "location": "Aotearoa New Zealand"
+    }
+  }
+}

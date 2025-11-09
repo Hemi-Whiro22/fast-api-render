@@ -1,0 +1,78 @@
+codex_env_best_practices:
+  role: "environment configuration guardian"
+  purpose: >
+    Maintain consistent and secure environment-variable handling across Ubuntu
+    development, test, and Render deployments. Guarantee UTF-8 macron safety and
+    proper override precedence (.env.local → .env → system → Render).
+
+  permanent_rules:
+    - "Never echo or log full secret values; show masked previews only."
+    - "Local .env/.env.local load first, but Render env vars override them."
+    - "LANG and LC_ALL must always default to mi_NZ.UTF-8."
+    - "All FastAPI startup must pass through load_env() before model imports."
+    - "If secrets are missing, fail fast with descriptive masked warnings."
+
+  implementation:
+    loader_sequence:
+      - backend/core/env_loader.py:
+          ensures:
+            - loads .env.local (if exists) then .env
+            - merges with os.environ for Render overrides
+            - validates SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY
+            - writes masked audit lines to logs/env_validation.log
+      - backend/core/config.py:
+          ensures:
+            - imports env_loader.load_env() before Pydantic Settings
+            - merges runtime variables in priority order
+            - exposes .summary() with masked keys
+      - backend/core/main.py:
+          ensures:
+            - prints UTF-8 locale summary
+            - exposes /env/health endpoint with utf8_verified flag
+            - exits if any critical secret missing
+
+  environment_files:
+    precedence_order:
+      1: ".env.local  # developer overrides"
+      2: ".env        # default project secrets"
+      3: "system environment  # OS or container vars"
+      4: "Render dashboard vars  # production overrides"
+    notes:
+      - ".env.local must be git-ignored"
+      - ".env.example kept under version control with placeholders"
+
+  verification_pipeline:
+    checks:
+      - "locale -a | grep mi_NZ.UTF-8"
+      - "python -c 'import locale; print(locale.getpreferredencoding())'"
+      - "pytest -q --disable-warnings"
+      - "curl http://localhost:8000/env/health | jq .utf8_verified"
+    logging:
+      file: logs/env_validation.log
+      fields:
+        - timestamp
+        - source (.env | Render)
+        - verified_utf8: true|false
+        - masked_summary
+        - missing_keys
+
+  render_integration:
+    render_yaml:
+      buildCommand: "chmod +x start.sh"
+      startCommand: "./start.sh"
+      envVars: "Configured via Render dashboard UI"
+    start_script:
+      file: start.sh
+      content: |
+        #!/usr/bin/env bash
+        export LANG=mi_NZ.UTF-8
+        export LC_ALL=mi_NZ.UTF-8
+        exec uvicorn backend.core.main:app --host 0.0.0.0 --port ${PORT:-8000}
+
+  initial_action:
+    - "Validate loader precedence and UTF-8 locale on local machine."
+    - "Confirm /env/health returns utf8_verified=true."
+    - "Push render.yaml and start.sh updates to repo."
+    - "Record verification to env_validation.log and manifest_update.log."
+  final_note:
+    - "Ensure all permanent rules are enforced before deployment."

@@ -24,15 +24,15 @@ echo "🧠 Testing imports..."
 PYTHONPATH=backend ./.venv/bin/python - <<'PYCODE'
 import importlib, sys
 try:
-    app = importlib.import_module("backend.core.main")
-    print("✅ backend.core.main imported successfully")
+    app = importlib.import_module("Te_Po.core.main")
+    print("✅ Te_Po.core.main imported successfully")
 except Exception as e:
     print("❌ Import failed:", e)
     sys.exit(1)
 PYCODE
 
 # 5️⃣ Optional quick boot test (comment out if not needed)
-# PYTHONPATH=backend ./.venv/bin/python -m uvicorn backend.core.main:app --reload --port 8001
+# PYTHONPATH=Te-Po ./.venv/bin/python -m uvicorn Te_Po.core.main:app --reload --port 8001
 
 echo "------------------------------------------"
 echo "🌊 Verification complete — review ❌ lines if any."

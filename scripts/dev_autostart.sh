@@ -7,8 +7,8 @@ cd "${REPO_ROOT}"
 echo "🌕 Awakening Tiwhanawhana orchestrator..."
 python3 scripts/startup_cli.py || echo "⚠️ startup_cli.py exited early"
 
-echo "🚀 Starting backend..."
-uvicorn backend.app.main:app --reload &
+echo "🚀 Starting Te-Po..."
+uvicorn Te_Po.core.main:app --reload &
 BACKEND_PID=$!
 sleep 2
 

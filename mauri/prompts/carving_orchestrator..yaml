@@ -1,0 +1,91 @@
+codex_carving_orchestrator:
+  role: "carving service architect and persistent memory guardian"
+  purpose: >
+    Extend the project by establishing a FastAPI-based carving interface powered by both OpenAI
+    and Ollama (LLaMA3) backends. The service must persist all received prompts and results to
+    Supabase under the Rongohia agent schema and operate through .mauri metadata for context.
+
+  permanent_rules:
+    - "Operate non-destructively; add capabilities without breaking existing APIs."
+    - "Do not hard-bind to one model provider; enable dynamic model selection at runtime."
+    - "Every prompt, even unused or partial, is stored with timestamp and origin context."
+    - "Situational prompts (environmental, manifest, or mauri-linked) may override defaults but are logged."
+    - "All Supabase operations must use service-role keys only in backend scope; no exposure to UI."
+
+  architecture:
+    - name: "carving_service"
+      framework: FastAPI
+      entrypoint: backend/services/carver/main.py
+      routes:
+        - POST /carve: accepts { prompt, context?, model? } → returns structured reply
+        - GET /carve/history: fetches saved prompts/responses
+        - GET /carve/models: enumerates available model backends (OpenAI, Ollama)
+      dependencies:
+        - backend/utils/openai_client.py
+        - backend/utils/ollama_client.py (new)
+        - backend/utils/supabase_client.py
+        - backend/utils/mauri_loader.py
+      persistence:
+        supabase_tables:
+          - rongohia.carvings
+          - rongohia.prompts_unused
+          - rongohia.prompt_contexts
+        artifacts:
+          - logs/carving_activity.log
+          - .mauri/session_state.json
+      runtime_context:
+        - Read .mauri/manifest.json for system identity and toolchain bindings.
+        - Use MAURI_ID and MAURI_STATE to select agent persona (Rongohia).
+
+  implementation_plan:
+    - step: "Create ollama_client.py"
+      description: >
+        Wrapper around local Ollama API for LLaMA3 inference. Include model availability check and
+        async generate_text(prompt) coroutine. Support fallback to OpenAI if Ollama unavailable.
+      output: patches/ollama_client.yaml
+
+    - step: "Build carver_service"
+      description: >
+        Instantiate FastAPI app exposing /carve endpoints. Allow model parameter (gpt-5-turbo or llama3)
+        and route through a unified carve() function that handles context, caching, and Supabase logging.
+      output: patches/carver_service.yaml
+
+    - step: "Integrate prompt memory"
+      description: >
+        On every /carve request, store the raw prompt, inferred context (manifest section or .mauri state),
+        and final reply in Supabase. If a prompt is never used, keep it under rongohia.prompts_unused until reactivated.
+      output: patches/prompt_memory.yaml
+
+    - step: "Situational prompt system"
+      description: >
+        Implement a lightweight rules engine that selects auxiliary prompt fragments
+        from .mauri/prompts/ based on route, user intent, or manifest section.
+        Merge situational data into the carve pipeline before dispatch.
+      output: patches/situational_prompts.yaml
+
+    - step: "Supabase consolidation"
+      description: >
+        Ensure all tables and logs for carving reside under the single Rongohia schema.
+        Update ProjectManifest.yaml accordingly under shared_clients.supabase_client and
+        routes.tiwhanawhana_namespace.rongohia.
+      output: patches/supabase_migration.yaml
+
+  verification:
+    - "Validate carving endpoints respond under both OpenAI and Ollama contexts."
+    - "Confirm Supabase receives inserts for all prompt and result entries."
+    - "Ensure .mauri metadata is parsed without privileged leakage."
+    - "Log each carve event to logs/carving_activity.log and manifest_update.log."
+
+  output_files:
+    - backend/services/carver/main.py
+    - backend/utils/ollama_client.py
+    - backend/utils/carving_engine.py
+    - patches/*.yaml (drafts for review)
+    - logs/carving_activity.log
+    - ProjectManifest.yaml (updated routes + services section)
+    - logs/manifest_update.log (with carving entry)
+
+  initial_action:
+    - "Generate stubs for carver_service, ollama_client, and carving_engine."
+    - "Update ProjectManifest.yaml with new service under services.carver_service."
+    - "Write summary entry to logs/manifest_update.log with timestamp and diff preview."

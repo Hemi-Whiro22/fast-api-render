@@ -1,0 +1,72 @@
+codex_final_alignment:
+  role: "runtime validator and model hygiene maintainer"
+  purpose: >
+    Complete the service hardening cycle: patch residual Pydantic warnings,
+    finalize Render startup behavior, and ensure UTF-8 environment enforcement
+    before production.
+
+  permanent_rules:
+    - "Never downgrade type safety for warnings; fix via model_config or alias."
+    - "Preserve masked logging pattern for all secrets."
+    - "Every deployed environment must verify UTF-8 locale before accepting traffic."
+    - "All FastAPI services start through load_env() → get_settings() sequence."
+
+  pydantic_hygiene:
+    targets:
+      - backend/routes/translate.py
+      - backend/models/**/*.py
+    task: >
+      Add `model_config = {"protected_namespaces": ()}` to any model that
+      triggers namespace or model_hint warnings.
+    verification:
+      - run pytest -q --disable-warnings
+      - confirm zero NamespaceWarning or ModelField warnings.
+
+  render_startup:
+    entrypoint: backend/core/main.py
+    requirements:
+      - call load_env() before FastAPI instantiation
+      - print masked summary of active environment
+      - include /env/health endpoint returning:
+          * utf8_status
+          * loaded_keys
+          * timestamp
+      - crash early if mandatory secrets missing
+    process:
+      - define `start.sh` wrapper:
+          ```bash
+          #!/usr/bin/env bash
+          export LANG=mi_NZ.UTF-8
+          export LC_ALL=mi_NZ.UTF-8
+          exec uvicorn backend.core.main:app --host 0.0.0.0 --port $PORT
+          ```
+      - add execute permission and Render build hook to copy it.
+
+  verification_pipeline:
+    smoke_tests:
+      - "Run `pytest -q` and confirm env loader logs masked keys only."
+      - "GET /health and /env/health return 200 with UTF-8 verified."
+      - "Check env_validation.log for 'UTF-8 verified: True'."
+    deployment:
+      - "Render logs must show masked key preview and locale summary."
+      - "Supabase client initialization confirmed using real keys."
+
+  documentation:
+    update_files:
+      - ProjectManifest.yaml → append render_startup section
+      - manifest_update.log → record patch + timestamp
+      - README.md → add 'Deployment: Environment & UTF-8 readiness' section
+    example_output:
+      env_validation.log entry:
+        timestamp: 2025-11-06T12:00:00Z
+        loaded_keys: [SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, OPENAI_API_KEY]
+        utf8_verified: true
+        context: render
+
+  initial_action:
+    - "Apply model_config fix to TranslationRequest and all related Pydantic models."
+    - "Generate start.sh with UTF-8 locale enforcement."
+    - "Add /env/health endpoint to backend/core/main.py."
+    - "Run verification pipeline and log outcome."
+  final_note:
+    - "Confirm all permanent rules upheld before marking task complete."

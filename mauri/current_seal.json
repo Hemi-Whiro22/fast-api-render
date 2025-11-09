@@ -1,0 +1,47 @@
+{
+  "context": "local",
+  "environment": {
+    "DATABASE_URL": "postgresql://postgres:postgres@db:5432/tiwhanawhana",
+    "DEN_URL": "https://ruqejtkudezadrqbdodx.supabase.co",
+    "TEPUNA_URL": "https://fyrzttjlvofmcfxibtpi.supabase.co",
+    "DEN_API_KEY": "<SUPABASE_SERVICE_ROLE_KEY_DEN>",
+    "TEPUNA_API_KEY": "<SUPABASE_SERVICE_ROLE_KEY_TEPUNA>",
+    "DEN_DB_URL": "postgresql://postgres:<den_pw>@db.ruqejtkudezadrqbdodx.supabase.co:6543/postgres",
+    "TEPUNA_DB_URL": "postgresql://postgres:<tepuna_pw>@db.fyrzttjlvofmcfxibtpi.supabase.co:6543/postgres",
+    "LANG": "mi_NZ.UTF-8",
+    "LC_ALL": "mi_NZ.UTF-8",
+    "TZ": "Pacific/Auckland",
+    "APP_NAME": "tiwhanawhana",
+    "APP_ENV": "local",
+    "APP_ENCODING": "utf-8",
+    "APP_LOCALE": "mi_NZ.UTF-8",
+    "CORS_ORIGINS": "*",
+    "OPENAI_API_KEY": "<OPENAI_API_KEY>",
+    "OPENAI_MODEL": "gpt40",
+    "LOCAL_MODEL": "llama3",
+    "ASSISTANT_ID": "asst_F5CRqwMvjgfKeYSJRcx76Gra",
+    "EMBEDDING_MODEL": "text-embedding-3-large",
+    "OCR_MODEL": "gpt-4o",
+    "TRANSLATION_MODEL": "gpt-4o-mini",
+    "ASSISTANT_MODEL": "gpt-5",
+    "KAIKAIKI_NAME": "Tiwhanawhana"
+  },
+  "supabase_schema": "tiwhanawhana",
+  "supabase_tables": [
+    "ti_memory",
+    "taonga_uploads",
+    "pdf_summaries",
+    "ocr_logs",
+    "translations",
+    "embeddings",
+    "task_queue",
+    "rongohia.user_profiles"
+  ],
+  "mauri": {
+    "glyph": null,
+    "lineage": null,
+    "mana_alignment": null,
+    "last_seal": "2025-11-05T21:20:51+00:00"
+  },
+  "timestamp": "2025-11-08T04:07:28.423915+00:00"
+}

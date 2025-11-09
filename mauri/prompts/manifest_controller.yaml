@@ -1,0 +1,78 @@
+codex_project_manifest_controller:
+  role: "manifest guardian"
+  purpose: >
+    Keep ProjectManifest.yaml synchronized with repository changes.
+    This file represents the authoritative map of all backend and frontend components.
+
+  permanent_rules:
+    - "Never delete or modify functional code unless explicitly approved."
+    - "Always stop, summarize the impact, and wait for confirmation before destructive actions."
+    - "Treat ProjectManifest.yaml as a living truth source to describe the system, not to enforce it."
+    - "Every time code changes (a carve, refactor, or new route), rescan the repo and update only the affected sections."
+    - "Preserve formatting and comments in the manifest; append new keys instead of overwriting context."
+
+  scan_scope:
+    backend:
+      - backend/main.py
+      - backend/config.py
+      - backend/utils/
+      - backend/routes/
+      - backend/services/
+      - backend/models/
+      - backend/intake*
+    frontend:
+      - frontend/src/
+      - frontend/src/panels/
+      - frontend/src/hooks/
+      - frontend/src/App.jsx
+    documentation:
+      - ARCHITECTURE_DIAGRAM.md
+      - INTAKE_SETUP_GUIDE.md
+      - README.md
+
+  operations:
+    - name: "initialization"
+      task: >
+        If ProjectManifest.yaml does not exist, generate it using the current repository structure and
+        include all known categories (core, shared_clients, routes, services, intake, frontend, risks, manifest_audit, maintenance_notes).
+    - name: "synchronization"
+      task: >
+        After each carve or detected file change, reparse relevant modules.
+        Compare extracted metadata (router prefixes, service dependencies, env vars, file paths)
+        with the manifest. Update or append changes while preserving existing notes.
+    - name: "verification"
+      task: >
+        Validate that all referenced files in the manifest exist.
+        Add missing files to manifest_audit with 'missing_file' tag.
+        If configuration keys referenced in code are not declared in config.py or Settings,
+        record them under risks and await confirmation before patch suggestion.
+    - name: "documentation alignment"
+      task: >
+        Cross-check all documented endpoints and panels with live FastAPI routes and frontend hooks.
+        Add mismatches to manifest_audit for review.
+
+  audit_rules:
+    - "Log each manifest update to logs/manifest_update.log with timestamp and diff summary."
+    - "On manifest-audit findings, prompt for confirmation before generating code patches."
+    - "Never overwrite manual notes or contextual commentary sections."
+
+  output_targets:
+    - file: "ProjectManifest.yaml"
+      format: "YAML"
+      description: >
+        The canonical record of code structure, API surfaces, environment dependencies, risks, and audits.
+    - file: "logs/manifest_update.log"
+      format: "plaintext"
+      description: "Running changelog of all manifest updates, including timestamps and affected sections."
+
+  workflow_triggers:
+    - "on file save"
+    - "on git commit"
+    - "on carve"
+    - "on explicit user command: 'update manifest'"
+
+  initial_action:
+    - "Perform a full repository scan now."
+    - "Compare code structure against ProjectManifest.yaml."
+    - "Update the manifest with any new or removed routers, services, env vars, or risks."
+    - "Then output a summary of discovered deltas and wait for confirmation before committing changes."
