@@ -2,7 +2,7 @@
   "tools": {
     "supabase": {
       "endpoint": "https://ruqejtkudezadrqbdodx.supabase.co",
-      "service_key": "sb_secret_SO-_CLOqSy8R5Y0xGWiIzQ_b1ycYnkW",
+      "service_key": "placeholder",
       "schemas": [
         "kitenga",
         "rongohia",
